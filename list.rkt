@@ -1,11 +1,10 @@
-#lang racket/base
+#lang typed/racket/base/no-check
 (require (for-syntax racket/base))
-(require racket/list racket/set racket/function)
+(require racket/list racket/set racket/function sugar/include)
 (require "define.rkt" "len.rkt" "coerce.rkt")
 
-(define+provide/contract (trimf xs test-proc)
-  (list? procedure? . -> . list?)
-  (dropf-right (dropf xs test-proc) test-proc))
+(include-without-lang-line "typed/list.rkt")
+
 
 (define (list-of-lists? xs) (and (list? xs) (andmap list? xs)))
 
@@ -161,5 +160,3 @@
              values
              (λ xs xs)) 
          (shift xs shift-amount-or-amounts fill-item)))
-
-
