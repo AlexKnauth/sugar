@@ -1,6 +1,6 @@
 #lang racket/base
 (require (for-syntax racket/base)
-         racket/list racket/set racket/function sugar/define racket/contract)
+         racket/list racket/set racket/function sugar/define)
 (require "len.rkt" "coerce.rkt")
 
 (module typed-functions typed/racket/base/no-check
@@ -9,8 +9,6 @@
 
 (require 'typed-functions)
 (provide+safe trimf (list? procedure? . -> . list?))
-
-
 
 (define (list-of-lists? xs) (and (list? xs) (andmap list? xs)))
 
