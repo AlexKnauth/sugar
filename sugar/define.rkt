@@ -7,6 +7,16 @@
 ;; each define macro recursively converts any form of define
 ;; into its lambda form (define name body ...) and then operates on that.
 
+(define-syntax (make-safe-module stx)
+  (syntax-case stx ()
+    [(_ name contract)
+     #'(module+ safe 
+         (require racket/contract)
+         (provide (contract-out [name contract])))]
+    [(_ name)
+     #'(module+ safe 
+         (provide name))]))
+
 (define-syntax (define+provide+safe stx)
   (syntax-case stx ()
     [(_ (proc arg ... . rest-arg) contract body ...)
@@ -16,8 +26,7 @@
      #'(begin
          (define name body ...)
          (provide name)
-         (module+ safe 
-           (provide (contract-out [name contract]))))]))
+         (make-safe-module name contract))]))
 
 ;; for previously defined identifiers
 (define-syntax (provide+safe stx)
@@ -25,13 +34,11 @@
     [(_ name contract)
      #'(begin
          (provide name)
-         (module+ safe 
-           (provide (contract-out [name contract]))))]
+         (make-safe-module name contract))]
     [(_ name)
      #'(begin
          (provide name)
-         (module+ safe
-           (provide name)))]))
+         (make-safe-module name))]))
 
 (define-syntax (define+provide/contract stx)
   (syntax-case stx ()
