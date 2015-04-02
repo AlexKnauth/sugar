@@ -6,6 +6,18 @@
 (require (for-syntax typed/racket/base racket/syntax))
 (provide (all-defined-out))
 
+;; get gets of typed source file, recompile it without typing in a submodule,
+;; then require those identifiers into the current level.
+(define-syntax (require-via-wormhole stx)
+  (syntax-case stx ()
+    [(_ path-spec)
+     (let ([mod-name (gensym)])
+       ;; need to use stx as context to get correct require behavior
+       (datum->syntax stx `(begin
+                             (module mod-name typed/racket/base/no-check
+                               (require sugar/include)
+                               (include-without-lang-line ,(syntax->datum #'path-spec)))
+                             (require (quote mod-name)))))]))
 
 
 (define-syntax (define/typed stx)
