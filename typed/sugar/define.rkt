@@ -1,6 +1,8 @@
 #lang typed/racket/base/no-check
 ;; use of no-check is deliberate here.
 ;; these helper macros don't do any type checking, just rearranging
+;; they can't be combined with the untyped define macros, however
+;; because the -> symbol is defined differently here
 (require (for-syntax typed/racket/base racket/syntax))
 (provide (all-defined-out))
 
