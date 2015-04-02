@@ -15,7 +15,7 @@ Icon
 .Trashes
 
 # generated documentation
-doc/*
+sugar/doc/*
 scribblings/*.js
 scribblings/*.css
 scribblings/*.html
