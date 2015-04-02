@@ -3,7 +3,7 @@
 (require racket/list racket/set racket/function sugar/include)
 (require "define.rkt" "len.rkt" "coerce.rkt")
 
-(include-without-lang-line "typed/list.rkt")
+(include-without-lang-line "../typed/list.rkt")
 
 
 (define (list-of-lists? xs) (and (list? xs) (andmap list? xs)))
