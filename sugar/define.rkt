@@ -19,6 +19,20 @@
          (module+ safe 
            (provide (contract-out [name contract]))))]))
 
+;; for previously defined identifiers
+(define-syntax (provide+safe stx)
+  (syntax-case stx ()
+    [(_ name contract)
+     #'(begin
+         (provide name)
+         (module+ safe 
+           (provide (contract-out [name contract]))))]
+    [(_ name)
+     #'(begin
+         (provide name)
+         (module+ safe
+           (provide name)))]))
+
 (define-syntax (define+provide/contract stx)
   (syntax-case stx ()
     [(_ (proc arg ... . rest-arg) contract body ...)

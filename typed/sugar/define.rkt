@@ -1,6 +1,10 @@
-#lang typed/racket/base
-(require (for-syntax typed/racket/base racket/syntax) (only-in typed/racket/draw Font-Weight Font-Style))
-(provide (all-defined-out) (all-from-out typed/racket/draw))
+#lang typed/racket/base/no-check
+;; use of no-check is deliberate here.
+;; these helper macros don't do any type checking, just rearranging
+(require (for-syntax typed/racket/base racket/syntax))
+(provide (all-defined-out))
+
+
 
 (define-syntax (define/typed stx)
   (syntax-case stx ()

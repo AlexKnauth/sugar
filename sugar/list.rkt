@@ -1,13 +1,17 @@
-#lang typed/racket/base/no-check
-(require (for-syntax racket/base))
-(require racket/list racket/set racket/function sugar/include)
-(require "define.rkt" "len.rkt" "coerce.rkt")
+#lang racket/base
+(require #;racket/list #;racket/set #;racket/function sugar/define racket/contract)
+#;(require "len.rkt" "coerce.rkt")
 
-(include-without-lang-line "../typed/list.rkt")
+(module typed-functions typed/racket/base/no-check
+  (require sugar/include)
+  (include-without-lang-line "../typed/sugar/list.rkt"))
+
+(require 'typed-functions)
+(provide+safe trimf (list? procedure? . -> . list?))
 
 
+#|
 (define (list-of-lists? xs) (and (list? xs) (andmap list? xs)))
-
 
 (define+provide/contract (slicef-at xs pred [force? #f])
   ((list? procedure?) (boolean?) . ->* . list-of-lists?)
@@ -160,3 +164,4 @@
              values
              (λ xs xs)) 
          (shift xs shift-amount-or-amounts fill-item)))
+|#
