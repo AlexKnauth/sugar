@@ -1,4 +1,4 @@
-Sugar [![Build Status](https://travis-ci.org/mbutterick/sugar.svg)](https://travis-ci.org/mbutterick/sugar)
+Sugar [![Build Status](https://travis-ci.org/mbutterick/sugar.svg?branch=typed)](https://travis-ci.org/mbutterick/sugar)
 -----
 
 Functions that improve the readability of Racket code.
