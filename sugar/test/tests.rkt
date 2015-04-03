@@ -3,6 +3,8 @@
 (require rackunit net/url racket/set racket/list)
 (require "../main.rkt")
 
+;; todo: add ->int tests
+
 (check-equal? (->string "foo") "foo")
 (check-equal? (->string '()) "")
 (check-equal? (->string (void)) "")

@@ -1,39 +1,29 @@
 #lang typed/racket/base
 (require (for-syntax typed/racket/base racket/syntax))
-(require typed/net/url racket/set racket/sequence racket/stream racket/dict)
+(require typed/net/url racket/set racket/sequence)
 (require typed/sugar/len typed/sugar/define)
 
 (define-syntax-rule (make-coercion-error-handler target-format x)
-  (λ(e) (error (format "Can’t convert ~a to ~a" x target-format))))
+  (λ(e) (error (format "Can’t convert ~s to ~a" x target-format))))
 
 
+(define-type Intable (U Lengthable Number String Symbol Char Path))
 (define/typed+provide (->int x)
-  (Any . -> . Integer)
+  (Intable . -> . Integer)
   (with-handlers ([exn:fail? (make-coercion-error-handler 'integer x)])
     (cond
-      [(or (integer? x) (real? x)) (inexact->exact (floor x))] 
-      [(and (string? x) (> (len x) 0)) (->int (string->number x))]
-      [(symbol? x) (->int (->string x))]
+      [(or (integer? x) (real? x)) (assert (inexact->exact (floor x)) integer?)]
+      [(complex? x) (->int (real-part x))]
+      [(string? x) (let ([strnum (string->number x)])
+                     (if (real? strnum) (->int strnum) (error 'ineligible-string)))]
+      [(or (symbol? x) (path? x)) (->int (->string x))]
       [(char? x) (char->integer x)]
-      [(path? x) (->int (->string x))]
-      [else (len x)])))
+      [else (len x)]))) ; covers Lengthable types
 
 
-(provide ->macrostring)
-(define-syntax-rule (->macrostring x)
-  (if (string? x)
-      x ; fast exit for strings
-      (with-handlers ([exn:fail? (make-coercion-error-handler 'string (format "~a (result of ~a" x 'x))])
-        (cond
-          [(or (equal? '() x) (void? x)) ""]
-          [(symbol? x) (symbol->string x)]
-          [(number? x) (number->string x)]
-          [(path? x) (path->string x)]
-          [(char? x) (format "~a" x)]
-          [else (error)]))))
-
+(define-type Stringable (U String Symbol Number Path Char))
 (define/typed+provide (->string x)
-  (Any . -> . String)
+  (Stringable . -> . String)
   (if (string? x)
       x ; fast exit for strings
       (with-handlers ([exn:fail? (make-coercion-error-handler 'string x)])
@@ -43,19 +33,24 @@
           [(number? x) (number->string x)]
           [(path? x) (path->string x)]
           [(char? x) (format "~a" x)]
-          [else (error)]))))
+          [else (error 'bad-type)]))))
 
 
+;; ->symbol, ->path, and ->url are just variants on ->string
+;; two advantages: return correct type, and more accurate error
+
+;; no need for "Symbolable" type - same as Stringable
 (define/typed+provide (->symbol x)
-  (Any . -> . Symbol)
+  (Stringable . -> . Symbol)
   (if (symbol? x)
       x
       (with-handlers ([exn:fail? (make-coercion-error-handler 'symbol x)])
         (string->symbol (->string x)))))
 
 
+;; no need for "Pathable" type - same as Stringable
 (define/typed+provide (->path x)
-  (Any . -> . Path)
+  (Stringable . -> . Path)
   (if (path? x)
       x 
       (with-handlers ([exn:fail? (make-coercion-error-handler 'path x)])
@@ -64,14 +59,15 @@
           [else (string->path (->string x))]))))
 
 
+;; no need for "URLable" type - same as Stringable
 (define/typed+provide (->url x)
-  (Any . -> . URL) 
+  (Stringable . -> . URL) 
   (with-handlers ([exn:fail? (make-coercion-error-handler 'url x)])
     (string->url (->string x))))
 
 
 (define/typed+provide (->complete-path x)
-  (Any . -> . Path)
+  (Stringable . -> . Path)
   (with-handlers ([exn:fail? (make-coercion-error-handler 'complete-path x)])
     (path->complete-path (->path x))))
 
@@ -83,13 +79,14 @@
       (with-handlers ([exn:fail? (make-coercion-error-handler 'list x)])
         (cond 
           [(string? x) (list x)]
-          [(vector? x) (vector->list x)]
+          [(vector? x) (for/list ([i (in-vector x)])
+                         i)]
           [(set? x) (set->list x)]
-          ;; location relevant because hash or dict are also sequences
-          [(dict? x) (dict->list x)] 
+          ;; conditional sequencing relevant because hash also tests true for `sequence?`
+          [(hash? x) (hash->list x)]
           [(integer? x) (list x)] ; because an integer tests #t for sequence?
           [(sequence? x) (sequence->list x)]
-          [(stream? x) (stream->list x)]
+          ;[(stream? x) (stream->list x)] ;; no support for streams in TR
           [else (list x)]))))
 
 
@@ -104,26 +101,3 @@
 (define/typed+provide (->boolean x)
   (Any . -> . Boolean)
   (and x #t))
-
-
-(define-syntax (make-*ish-predicate stx)
-  (syntax-case stx ()
-    [(_ stem Type)
-     (with-syntax ([stemish? (format-id stx "~aish?" #'stem)]
-                   [->stem (format-id stx "->~a" #'stem)])
-       #`(begin
-           (define/typed+provide (stemish? x)
-             (Any . -> . Boolean : Type)
-             (with-handlers ([exn:fail? (λ(e) #f)]) (and (->stem x) #t)))))]))
-
-(make-*ish-predicate int Integer)
-(make-*ish-predicate string String)
-(make-*ish-predicate symbol Symbol)
-(make-*ish-predicate url URL)
-(make-*ish-predicate complete-path Path)
-(make-*ish-predicate path Path)
-(make-*ish-predicate list (Listof Any))
-(make-*ish-predicate vector VectorTop)
-;; no point to having list and vector here; they work with everything
-
-

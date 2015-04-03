@@ -1,6 +1,18 @@
 #lang racket/base
-(require (for-syntax racket/base racket/syntax) sugar/define)
+(require (for-syntax racket/base racket/syntax) sugar/define net/url)
 
+(require-via-wormhole "../typed/sugar/coerce.rkt")
+
+
+(provide+safe [->int (any/c . -> . integer?)]
+              [->string (any/c . -> . string?)]
+              [->symbol (any/c . -> . symbol?)]
+              [->path (any/c . -> . path?)]
+              [->complete-path (any/c . -> . complete-path?)]
+              [->url (any/c . -> . url?)]
+              [->list (any/c . -> . list?)]
+              [->vector (any/c . -> . vector?)]
+              [->boolean (any/c . -> . boolean?)])
 
 (define-syntax-rule (make-blame-handler try-proc expected-sym)
   (λ(b)
