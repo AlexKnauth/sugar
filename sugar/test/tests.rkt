@@ -4,6 +4,7 @@
 (require "../main.rkt")
 
 ;; todo: add ->int tests
+;; todo: add members-unique tests
 
 (check-equal? (->string "foo") "foo")
 (check-equal? (->string '()) "")

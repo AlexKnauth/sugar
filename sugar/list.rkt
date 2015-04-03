@@ -1,7 +1,7 @@
 #lang racket/base
 (require (for-syntax racket/base)
          racket/list racket/set racket/function sugar/define)
-(require #;"len.rkt" #;"coerce.rkt")
+(require "len.rkt" "coerce.rkt")
 
 (require-via-wormhole "../typed/sugar/list.rkt")
 
@@ -14,8 +14,7 @@
               [filter-split (list? predicate/c . -> . list-of-lists?)]
               [frequency-hash (list? . -> . hash?)]
               [members-unique? ((or/c list? vector? string?) . -> . boolean?)]
-              [members-unique?/error (any/c . -> . boolean?)])
-
+              [members-unique?/error ((or/c list? vector? string?) . -> . boolean?)])
 
 
 #|
