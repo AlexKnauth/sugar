@@ -42,27 +42,20 @@
          (make-safe-module name contract))]))
 
 ;; for previously defined identifiers
+;; takes args like (provide+safe [ident contract]) or just (provide+safe ident)
+;; any number of args.
 (define-syntax (provide+safe stx)
   (syntax-case stx () 
-    [(_ name contract)
-     #'(begin
-         (provide name)
-         (make-safe-module name contract))]
-    [(_ name)
-     #'(begin
-         (provide name)
-         (make-safe-module name))]
-    [(_ exprs ...) ; variadic case
-     (let ()
-       (define args (syntax->datum #'(exprs ...)))
-       (define-values (names contracts)
-         (for/fold ([names null][contracts null])
-                   ([(a i) (in-indexed args)])
-           (if (even? i)
-               (values (cons a names) contracts)
-               (values names (cons a contracts)))))
-       (datum->syntax stx `(begin
-           ,@(map (λ(n c) `(provide+safe ,n ,c)) names contracts))))]))
+    [(_ items ...)
+     (datum->syntax stx
+                    `(begin
+                       ,@(for/list ([item (in-list (syntax->datum #'(items ...)))])
+                           (define-values (name contract) (if (pair? item)
+                                                              (values (car item) (cadr item))
+                                                              (values item #f)))
+                           `(begin
+                              (provide ,name)
+                              (make-safe-module ,name ,@(if contract (list contract) null))))))]))
 
 (define-syntax (define+provide/contract stx)
   (syntax-case stx ()

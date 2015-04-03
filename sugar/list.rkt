@@ -1,33 +1,23 @@
 #lang racket/base
 (require (for-syntax racket/base)
          racket/list racket/set racket/function sugar/define)
-(require "len.rkt" "coerce.rkt")
+(require #;"len.rkt" #;"coerce.rkt")
 
 (require-via-wormhole "../typed/sugar/list.rkt")
 
 (define (list-of-lists? xs) (and (list? xs) (andmap list? xs)))
 
-(provide+safe trimf (list? procedure? . -> . list?)
-              slicef-at ((list? procedure?) (boolean?) . ->* . list-of-lists?)
-              slicef-after (list? procedure? . -> . list-of-lists?)
-              slice-at ((list? (and/c integer? positive?)) (boolean?) . ->* . list-of-lists?)
-              filter-split (list? predicate/c . -> . list-of-lists?)
-              frequency-hash (list? . -> . hash?)
-              members-unique? ((or/c list? vector? string?) . -> . boolean?))
+(provide+safe [trimf (list? procedure? . -> . list?)]
+              [slicef-at ((list? procedure?) (boolean?) . ->* . list-of-lists?)]
+              [slicef-after (list? procedure? . -> . list-of-lists?)]
+              [slice-at ((list? (and/c integer? positive?)) (boolean?) . ->* . list-of-lists?)]
+              [filter-split (list? predicate/c . -> . list-of-lists?)]
+              [frequency-hash (list? . -> . hash?)]
+              #;[members-unique? ((or/c list? vector? string?) . -> . boolean?)])
 
 
 
-(define+provide/contract (members-unique?/error x)
-  (any/c . -> . boolean?)
-  (define result (members-unique? x))
-  (if (not result)
-      (let* ([duplicate-keys (filter-not empty? (hash-map (frequency-hash x) 
-                                                          (λ(k v) (if (> v 1) k '()))))])
-        (error (string-append "members-unique? failed because " (if (= (len duplicate-keys) 1) 
-                                                                    "item isn’t"
-                                                                    "items aren’t") " unique:") duplicate-keys))
-      result))
-
+#|
 
 ;; for use inside quasiquote
 ;; instead of ,(when ...) use ,@(when/splice ...)
@@ -95,3 +85,6 @@
              values
              (λ xs xs)) 
          (shift xs shift-amount-or-amounts fill-item)))
+
+
+|#
