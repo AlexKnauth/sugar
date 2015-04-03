@@ -1,13 +1,14 @@
 #lang typed/racket/base
-(require (for-syntax racket/base racket/syntax))
-(require net/url racket/set racket/contract racket/sequence racket/stream racket/dict)
+(require (for-syntax typed/racket/base racket/syntax))
+(require typed/net/url racket/set racket/sequence racket/stream racket/dict)
 (require typed/sugar/len typed/sugar/define)
 
-(define (make-coercion-error-handler target-format x)
+(define-syntax-rule (make-coercion-error-handler target-format x)
   (λ(e) (error (format "Can’t convert ~a to ~a" x target-format))))
 
 
-(define+provide (->int x)
+(define/typed+provide (->int x)
+  (Any . -> . Integer)
   (with-handlers ([exn:fail? (make-coercion-error-handler 'integer x)])
     (cond
       [(or (integer? x) (real? x)) (inexact->exact (floor x))] 
@@ -31,7 +32,8 @@
           [(char? x) (format "~a" x)]
           [else (error)]))))
 
-(define+provide (->string x)
+(define/typed+provide (->string x)
+  (Any . -> . String)
   (if (string? x)
       x ; fast exit for strings
       (with-handlers ([exn:fail? (make-coercion-error-handler 'string x)])
@@ -44,14 +46,16 @@
           [else (error)]))))
 
 
-(define+provide (->symbol x)
+(define/typed+provide (->symbol x)
+  (Any . -> . Symbol)
   (if (symbol? x)
       x
       (with-handlers ([exn:fail? (make-coercion-error-handler 'symbol x)])
         (string->symbol (->string x)))))
 
 
-(define+provide (->path x)
+(define/typed+provide (->path x)
+  (Any . -> . Path)
   (if (path? x)
       x 
       (with-handlers ([exn:fail? (make-coercion-error-handler 'path x)])
@@ -60,17 +64,20 @@
           [else (string->path (->string x))]))))
 
 
-(define+provide (->url x)
+(define/typed+provide (->url x)
+  (Any . -> . URL) 
   (with-handlers ([exn:fail? (make-coercion-error-handler 'url x)])
     (string->url (->string x))))
 
 
-(define+provide (->complete-path x)
+(define/typed+provide (->complete-path x)
+  (Any . -> . Path)
   (with-handlers ([exn:fail? (make-coercion-error-handler 'complete-path x)])
     (path->complete-path (->path x))))
 
 
-(define+provide (->list x)
+(define/typed+provide (->list x)
+  (Any . -> . (Listof Any))
   (if (list? x)
       x
       (with-handlers ([exn:fail? (make-coercion-error-handler 'list x)])
@@ -86,71 +93,37 @@
           [else (list x)]))))
 
 
-(define+provide (->vector x)
+(define/typed+provide (->vector x)
+  (Any . -> . VectorTop)
   (if (vector? x)
       x
       (with-handlers ([exn:fail? (make-coercion-error-handler 'vector x)])
         (list->vector (->list x)))))
 
 
-(define+provide (->boolean x)
+(define/typed+provide (->boolean x)
+  (Any . -> . Boolean)
   (and x #t))
 
 
 (define-syntax (make-*ish-predicate stx)
   (syntax-case stx ()
-    [(_ stem)
+    [(_ stem Type)
      (with-syntax ([stemish? (format-id stx "~aish?" #'stem)]
                    [->stem (format-id stx "->~a" #'stem)])
        #`(begin
-           (define+provide (stemish? x)
+           (define/typed+provide (stemish? x)
+             (Any . -> . Boolean : Type)
              (with-handlers ([exn:fail? (λ(e) #f)]) (and (->stem x) #t)))))]))
 
-(make-*ish-predicate int)
-(make-*ish-predicate string)
-(make-*ish-predicate symbol)
-(make-*ish-predicate url)
-(make-*ish-predicate complete-path)
-(make-*ish-predicate path)
-(make-*ish-predicate list)
-(make-*ish-predicate vector)
+(make-*ish-predicate int Integer)
+(make-*ish-predicate string String)
+(make-*ish-predicate symbol Symbol)
+(make-*ish-predicate url URL)
+(make-*ish-predicate complete-path Path)
+(make-*ish-predicate path Path)
+(make-*ish-predicate list (Listof Any))
+(make-*ish-predicate vector VectorTop)
 ;; no point to having list and vector here; they work with everything
 
-
-
-(define-syntax-rule (make-blame-handler try-proc expected-sym)
-  (λ(b)
-    (λ(x)
-      (with-handlers ([exn:fail? (λ(e)
-                                   (raise-blame-error
-                                    b x
-                                    '(expected: "~a" given: "~e")
-                                    expected-sym x))])
-        (try-proc x)))))
-
-(provide make-coercion-contract)
-(define-syntax (make-coercion-contract stx)
-  (syntax-case stx ()
-    [(_ stem coerce-proc)
-     (with-syntax ([coerce/stem? (format-id stx "coerce/~a?" #'stem)]
-                   [can-be-stem? (format-id stx "can-be-~a?" #'stem)])
-       #'(make-contract
-          #:name 'coerce/stem?
-          #:projection (make-blame-handler coerce-proc 'can-be-stem?)))]
-    [(_ stem)
-     (with-syntax ([->stem (format-id stx "->~a" #'stem)])
-       #'(make-coercion-contract stem ->stem))]))
-
-(define-syntax (define+provide-coercion-contract stx)
-  (syntax-case stx ()
-    [(_ stem)
-     (with-syntax ([coerce/stem? (format-id stx "coerce/~a?" #'stem)])
-       #'(define+provide coerce/stem? (make-coercion-contract stem)))]))
-
-(define+provide-coercion-contract int)
-(define+provide-coercion-contract string)
-(define+provide-coercion-contract symbol)
-(define+provide-coercion-contract path)
-(define+provide-coercion-contract boolean)
-(define+provide-coercion-contract list)
 

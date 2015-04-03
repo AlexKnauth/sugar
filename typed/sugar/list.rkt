@@ -1,5 +1,5 @@
 #lang typed/racket/base
-(require (except-in racket/list flatten) typed/sugar/define #;sugar/len)
+(require (except-in racket/list flatten) typed/sugar/define sugar/len)
 ;; use fully-qualified paths in require,
 ;; so they'll work when this file is included elsewhere
 (provide (all-defined-out))
@@ -84,7 +84,8 @@
     (hash-update! counter item (λ([v : Integer]) (add1 v)) (λ _ 0)))
   counter)
 
-#|
+
+
 (define/typed+provide (members-unique? x)
   (All (A) ((U (Listof A) (Vectorof A) String) -> Boolean))  
   (cond 
@@ -94,8 +95,8 @@
     [else (error (format "members-unique? cannot be determined for ~a" x))]))
 
 
-(define+provide/contract (members-unique?/error x)
-  (any/c . -> . boolean?)
+(define/typed+provide (members-unique?/error x)
+  (Any . -> . Boolean)
   (define result (members-unique? x))
   (if (not result)
       (let* ([duplicate-keys (filter-not empty? (hash-map (frequency-hash x) 
@@ -105,4 +106,4 @@
                                                                     "items aren’t") " unique:") duplicate-keys))
       result))
 
-|#
+

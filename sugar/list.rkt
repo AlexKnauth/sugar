@@ -13,7 +13,8 @@
               [slice-at ((list? (and/c integer? positive?)) (boolean?) . ->* . list-of-lists?)]
               [filter-split (list? predicate/c . -> . list-of-lists?)]
               [frequency-hash (list? . -> . hash?)]
-              #;[members-unique? ((or/c list? vector? string?) . -> . boolean?)])
+              [members-unique? ((or/c list? vector? string?) . -> . boolean?)]
+              [members-unique?/error (any/c . -> . boolean?)])
 
 
 
