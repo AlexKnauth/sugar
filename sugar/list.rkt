@@ -3,86 +3,18 @@
          racket/list racket/set racket/function sugar/define)
 (require "len.rkt" "coerce.rkt")
 
-(module typed-functions typed/racket/base/no-check
-  (require sugar/include)
-  (include-without-lang-line "../typed/sugar/list.rkt"))
-
-(require 'typed-functions)
-(provide+safe trimf (list? procedure? . -> . list?))
+(require-via-wormhole "../typed/sugar/list.rkt")
 
 (define (list-of-lists? xs) (and (list? xs) (andmap list? xs)))
 
-(define+provide/contract (slicef-at xs pred [force? #f])
-  ((list? procedure?) (boolean?) . ->* . list-of-lists?)
-  (define-values (last-list list-of-lists)
-    (for/fold ([current-list empty][list-of-lists empty])([x (in-list xs)])
-      (if (pred x)
-          (values (cons x null) (if (not (empty? current-list))
-                                    (cons (reverse current-list) list-of-lists)
-                                    list-of-lists))
-          (values (cons x current-list) list-of-lists))))
-  (let ([list-of-lists (reverse (if (empty? last-list)
-                                    list-of-lists
-                                    (cons (reverse last-list) list-of-lists)))])
-    (if (and force? (not (empty? list-of-lists)) (not (pred (caar list-of-lists))))
-        (cdr list-of-lists)
-        list-of-lists)))
+(provide+safe trimf (list? procedure? . -> . list?)
+              slicef-at ((list? procedure?) (boolean?) . ->* . list-of-lists?)
+              slicef-after (list? procedure? . -> . list-of-lists?)
+              slice-at ((list? (and/c integer? positive?)) (boolean?) . ->* . list-of-lists?)
+              filter-split (list? predicate/c . -> . list-of-lists?)
+              frequency-hash (list? . -> . hash?)
+              members-unique? ((or/c list? vector? string?) . -> . boolean?))
 
-
-(define+provide/contract (slicef-after xs pred)
-  (list? procedure? . -> . list-of-lists?)
-  (define-values (last-list list-of-lists)
-    (for/fold ([current-list empty][list-of-lists empty])([x (in-list xs)])
-      (if (pred x)
-          (values empty (cons (reverse (cons x current-list)) list-of-lists))
-          (values (cons x current-list) list-of-lists))))
-  (reverse (if (empty? last-list)
-               list-of-lists
-               (cons (reverse last-list) list-of-lists))))
-
-
-(define+provide/contract (slice-at xs len [force? #f])
-  ((list? (and/c integer? positive?)) (boolean?) . ->* . list-of-lists?)
-  (define-values (last-list list-of-lists)
-    (for/fold ([current-list empty][list-of-lists empty])([(x i) (in-indexed xs)])
-      (if (= (modulo (add1 i) len) 0)
-          (values empty (cons (reverse (cons x current-list)) list-of-lists))
-          (values (cons x current-list) list-of-lists))))
-  (reverse (if (or (empty? last-list) (and force? (not (= len (length last-list)))))
-               list-of-lists
-               (cons (reverse last-list) list-of-lists))))
-
-
-(define+provide/contract (filter-split xs pred)
-  (list? predicate/c . -> . list-of-lists?)
-  (define-values (last-list list-of-lists)
-    (for/fold ([current-list empty][list-of-lists empty])
-              ([x (in-list xs)])
-      (if (pred x)
-          (values empty (if (not (empty? current-list))
-                            (cons (reverse current-list) list-of-lists)
-                            list-of-lists))
-          (values (cons x current-list) list-of-lists))))
-  (reverse (if (not (empty? last-list))
-               (cons (reverse last-list) list-of-lists)
-               list-of-lists)))
-
-
-(define+provide/contract (frequency-hash x)
-  (list? . -> . hash?)
-  (define counter (make-hash))
-  (for ([item (in-list (flatten x))]) 
-    (hash-set! counter item (add1 (hash-ref counter item 0))))
-  counter)
-
-
-(define+provide/contract (members-unique? x)
-  ((or/c list? vector? string?) . -> . boolean?)  
-  (cond 
-    [(list? x) (= (len (remove-duplicates x)) (len x))]
-    [(vector? x) (->list x)]
-    [(string? x) (string->list x)]
-    [else (error (format "members-unique? cannot be determined for ~a" x))]))
 
 
 (define+provide/contract (members-unique?/error x)

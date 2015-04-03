@@ -1,7 +1,7 @@
-#lang racket/base
+#lang typed/racket/base
 (require (for-syntax racket/base racket/syntax))
 (require net/url racket/set racket/contract racket/sequence racket/stream racket/dict)
-(require "len.rkt" "define.rkt")
+(require typed/sugar/len typed/sugar/define)
 
 (define (make-coercion-error-handler target-format x)
   (λ(e) (error (format "Can’t convert ~a to ~a" x target-format))))

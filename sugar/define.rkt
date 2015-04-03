@@ -4,6 +4,19 @@
 
 (provide (all-defined-out) (all-from-out racket/contract))
 
+;; get gets of typed source file, recompile it without typing in a submodule,
+;; then require those identifiers into the current level.
+(define-syntax (require-via-wormhole stx)
+  (syntax-case stx ()
+    [(_ path-spec)
+     (let ([mod-name (gensym)])
+       ;; need to use stx as context to get correct require behavior
+       (datum->syntax stx `(begin
+                             (module mod-name typed/racket/base/no-check
+                               (require sugar/include)
+                               (include-without-lang-line ,(syntax->datum #'path-spec)))
+                             (require (quote mod-name)))))]))
+
 ;; each define macro recursively converts any form of define
 ;; into its lambda form (define name body ...) and then operates on that.
 
@@ -30,7 +43,7 @@
 
 ;; for previously defined identifiers
 (define-syntax (provide+safe stx)
-  (syntax-case stx ()
+  (syntax-case stx () 
     [(_ name contract)
      #'(begin
          (provide name)
@@ -38,7 +51,18 @@
     [(_ name)
      #'(begin
          (provide name)
-         (make-safe-module name))]))
+         (make-safe-module name))]
+    [(_ exprs ...) ; variadic case
+     (let ()
+       (define args (syntax->datum #'(exprs ...)))
+       (define-values (names contracts)
+         (for/fold ([names null][contracts null])
+                   ([(a i) (in-indexed args)])
+           (if (even? i)
+               (values (cons a names) contracts)
+               (values names (cons a contracts)))))
+       (datum->syntax stx `(begin
+           ,@(map (λ(n c) `(provide+safe ,n ,c)) names contracts))))]))
 
 (define-syntax (define+provide/contract stx)
   (syntax-case stx ()
