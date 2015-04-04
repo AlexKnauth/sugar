@@ -8,10 +8,10 @@
   "define.rkt"
   "file.rkt"
   "include.rkt"
+  "len.rkt"
   "list.rkt"
   "misc.rkt"
   "string.rkt"
-  "len.rkt"
   "xml.rkt")
 
 (provide 
@@ -23,8 +23,8 @@
   "define.rkt"
   "file.rkt"
   "include.rkt"
+  "len.rkt"
   "list.rkt"
   "misc.rkt"
   "string.rkt"
-  "len.rkt"
   "xml.rkt"))
