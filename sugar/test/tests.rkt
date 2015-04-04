@@ -16,8 +16,6 @@
 (check-equal? (->string (string->path file-name-as-text)) file-name-as-text)
 (check-equal? (->string #\¶) "¶")
 
-
-
 (check-equal? (->path "foo") (string->path "foo"))
 (check-equal? (->path 'foo) (string->path "foo"))
 (check-equal? (->path 123) (string->path "123"))

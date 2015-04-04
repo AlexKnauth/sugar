@@ -9,7 +9,7 @@
 
 
 (define+provide+safe (get container start [end #f])
-  ((gettable-container? any/c) ((or/c (and/c integer? positive?) #f)) . ->* . any/c)
+  ((gettable-container? any/c) ((or/c (and/c integer? positive?) #f)) . ->* . any)
   
   (define result 
     ;; use handler to capture error & print localized error message
@@ -35,12 +35,12 @@
   (ormap (λ(pred) (pred container)) (list vector? set? sequence?)))
 
 (define+provide+safe (in? item container)
-  (any/c any/c . -> . coerce/boolean?)
-  (cond
+  (any/c any/c . -> . boolean?)
+  (->boolean (cond
     [(list? container) (member item container)]
     [(dict? container) (dict-has-key? container item)]
     [(path? container) (in? (->path item) (explode-path container))]
     [(stringish? container) (regexp-match (->string item) (->string container))]
     ;; location relevant because dicts and strings are also listlike (= sequences)
     [(listlike-container? container) (in? item (->list container))]
-    [else #f]))
+    [else #f])))

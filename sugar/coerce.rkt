@@ -12,11 +12,11 @@
               [->url (any/c . -> . url?)]
               [->list (any/c . -> . list?)]
               [->vector (any/c . -> . vector?)]
-              [->boolean (any/c . -> . boolean?)]
-              stringish?)
+              [->boolean (any/c . -> . boolean?)])
 
 
-;; coercion contracts only make sense in untyped code
+;; coercion contracts & *ish predicates
+;; only make sense in untyped code
 ;; thus they are here.
 (define-syntax-rule (make-blame-handler try-proc expected-sym)
   (λ(b)
@@ -56,3 +56,23 @@
 (define+provide-coercion-contract boolean)
 (define+provide-coercion-contract list)
 
+
+
+(define-syntax (make-*ish-predicate stx)
+  (syntax-case stx ()
+    [(_ stem)
+     (with-syntax ([stemish? (format-id stx "~aish?" #'stem)]
+                   [->stem (format-id stx "->~a" #'stem)])
+       #`(begin
+           (provide+safe stemish?)
+           (define (stemish? x)
+             (with-handlers ([exn:fail? (λ(e) #f)]) (and (->stem x) #t)))))]))
+
+(make-*ish-predicate int)
+(make-*ish-predicate string)
+(make-*ish-predicate symbol)
+(make-*ish-predicate url)
+(make-*ish-predicate complete-path)
+(make-*ish-predicate path)
+(make-*ish-predicate list)
+(make-*ish-predicate vector)

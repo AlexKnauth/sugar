@@ -133,17 +133,18 @@
 
 
 (define/typed+provide (break-at xs bps)
-  (All (A) ((Listof A) (Listof Index) -> (Listof (Listof A))))
-  (when (ormap (λ([bp : Index]) (>= bp (length xs))) bps)
-    (error 'break-at (format "breakpoint in ~v is greater than or equal to input list length = ~a" bps (length xs))))
-  ;; easier to do back to front, because then the list index for each item won't change during the recursion
-  ;; cons a zero onto bps (which may already start with zero) and then use that as the terminating condition
-  ;; because breaking at zero means we've reached the start of the list
-  (reverse (let loop ([xs xs][bps (reverse (cons 0 bps))])
-             (if (= (car bps) 0)
-                 (cons xs null) ; return whatever's left, because no more splits are possible
-                 (let-values ([(head tail) (split-at xs (car bps))])
-                   (cons tail (loop head (cdr bps))))))))
+  (All (A) ((Listof A) (U Index (Listof Index)) -> (Listof (Listof A))))
+  (let ([bps (if (list? bps) bps (list bps))]) ; coerce bps to list
+    (when (ormap (λ([bp : Index]) (>= bp (length xs))) bps)
+      (error 'break-at (format "breakpoint in ~v is greater than or equal to input list length = ~a" bps (length xs))))
+    ;; easier to do back to front, because then the list index for each item won't change during the recursion
+    ;; cons a zero onto bps (which may already start with zero) and then use that as the terminating condition
+    ;; because breaking at zero means we've reached the start of the list
+    (reverse (let loop ([xs xs][bps (reverse (cons 0 bps))])
+               (if (= (car bps) 0)
+                   (cons xs null) ; return whatever's left, because no more splits are possible
+                   (let-values ([(head tail) (split-at xs (car bps))])
+                     (cons tail (loop head (cdr bps)))))))))
 
 
 (define/typed+provide (shift xs shift-amount-or-amounts [fill-item #f] [cycle? #f])

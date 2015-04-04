@@ -32,8 +32,8 @@
 ;; put extension on path
 ;; use local contract here because this function is used within module
 (define/typed+provide (add-ext x ext)
-  (Stringish Stringish . -> . String)
-  (string-append (->string x) "." (->string ext)))
+  (Stringish Stringish . -> . Path)
+  (->path (string-append (->string x) "." (->string ext))))
 
 ;; take one extension off path
 (define/typed+provide (remove-ext x)
