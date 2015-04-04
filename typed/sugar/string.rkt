@@ -1,4 +1,4 @@
-#lang racket/base
+#lang typed/racket/base
 (require typed/sugar/define typed/sugar/coerce)
 
 (define/typed+provide (starts-with? str starter)
