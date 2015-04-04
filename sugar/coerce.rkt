@@ -12,7 +12,8 @@
               [->url (any/c . -> . url?)]
               [->list (any/c . -> . list?)]
               [->vector (any/c . -> . vector?)]
-              [->boolean (any/c . -> . boolean?)])
+              [->boolean (any/c . -> . boolean?)]
+              stringish?)
 
 
 ;; coercion contracts only make sense in untyped code
