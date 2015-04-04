@@ -21,9 +21,11 @@
       [else (len x)]))) ; covers Lengthable types
 
 
-(define-type Stringable (U String Symbol Number Path Char))
+(provide Stringish)
+(define-type Stringish (U String Symbol Number Path Char))
+
 (define/typed+provide (->string x)
-  (Stringable . -> . String)
+  (Stringish . -> . String)
   (if (string? x)
       x ; fast exit for strings
       (with-handlers ([exn:fail? (make-coercion-error-handler 'string x)])
@@ -41,7 +43,7 @@
 
 ;; no need for "Symbolable" type - same as Stringable
 (define/typed+provide (->symbol x)
-  (Stringable . -> . Symbol)
+  (Stringish . -> . Symbol)
   (if (symbol? x)
       x
       (with-handlers ([exn:fail? (make-coercion-error-handler 'symbol x)])
@@ -49,8 +51,10 @@
 
 
 ;; no need for "Pathable" type - same as Stringable
+(define-type Pathish Stringish)
+(provide Pathish)
 (define/typed+provide (->path x)
-  (Stringable . -> . Path)
+  (Pathish . -> . Path)
   (if (path? x)
       x 
       (with-handlers ([exn:fail? (make-coercion-error-handler 'path x)])
@@ -61,13 +65,13 @@
 
 ;; no need for "URLable" type - same as Stringable
 (define/typed+provide (->url x)
-  (Stringable . -> . URL) 
+  (Stringish . -> . URL) 
   (with-handlers ([exn:fail? (make-coercion-error-handler 'url x)])
     (string->url (->string x))))
 
 
 (define/typed+provide (->complete-path x)
-  (Stringable . -> . Path)
+  (Stringish . -> . Path)
   (with-handlers ([exn:fail? (make-coercion-error-handler 'complete-path x)])
     (path->complete-path (->path x))))
 
