@@ -19,8 +19,8 @@
 
 (define/typed+provide get
   ;; (U Index A) = get key. Either a numerical index, or hashkey of type A
-  (All (A) (case-> ((HashTable A Any) Any (Option Index) . -> . Any)
-                   ((HashTable A Any) Any . -> . Any)
+  (All (A) (case-> ((HashTable A Any) A (Option Index) . -> . Any)
+                   ((HashTable A Any) A . -> . Any)
                    ((Containerof A) Index (Option Index) . -> . (U A (Containerof A)))
                    ((Containerof A) Index . -> . (U A (Containerof A)))))
   (case-lambda
@@ -30,7 +30,7 @@
      (define result 
        ;; use handler to capture error & print localized error message
        (with-handlers ([exn:fail? (λ(exn) (error (format "get: couldn’t retrieve ~a from ~a" (if end (format "items ~a through ~a" start end) (format "item ~a" start)) container)))])
-         (let ([end (if (or end (hash? container)) end (add1 start))])
+         (let ([end (if (and (equal? #f end) (sliceable-container? container)) (add1 start) end)])
            (cond
              [(hash? container) (hash-ref container start)]
              [(list? container) (for/list : (Listof A) ([i (in-range start end)]) (list-ref container i))]
