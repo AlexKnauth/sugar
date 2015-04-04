@@ -9,8 +9,7 @@
   "sugar/len.rkt"
   "sugar/list.rkt"
   "sugar/misc.rkt"
-  "sugar/string.rkt"
-  "sugar/xml.rkt")
+  "sugar/string.rkt")
 
 (provide 
  (all-from-out
@@ -22,5 +21,4 @@
   "sugar/len.rkt"
   "sugar/list.rkt"
   "sugar/misc.rkt"
-  "sugar/string.rkt"
-  "sugar/xml.rkt"))
+  "sugar/string.rkt"))
