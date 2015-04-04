@@ -14,6 +14,9 @@
               [->vector (any/c . -> . vector?)]
               [->boolean (any/c . -> . boolean?)])
 
+
+;; coercion contracts only make sense in untyped code
+;; thus they are here.
 (define-syntax-rule (make-blame-handler try-proc expected-sym)
   (λ(b)
     (λ(x)
@@ -24,7 +27,7 @@
                                     expected-sym x))])
         (try-proc x)))))
 
-(provide make-coercion-contract)
+(provide+safe make-coercion-contract)
 (define-syntax (make-coercion-contract stx)
   (syntax-case stx ()
     [(_ stem coerce-proc)
