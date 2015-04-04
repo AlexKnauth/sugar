@@ -23,6 +23,8 @@
 
 (provide Stringish)
 (define-type Stringish (U String Symbol Number Path Char))
+(provide stringish?)
+(define-predicate stringish? Stringish)
 
 (define/typed+provide (->string x)
   (Stringish . -> . String)
