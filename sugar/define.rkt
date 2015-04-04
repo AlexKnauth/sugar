@@ -2,7 +2,7 @@
 (require (for-syntax racket/base))
 (require racket/contract)
 
-(provide (all-defined-out) (all-from-out racket/contract))
+(provide (all-from-out racket/contract))
 
 ;; get gets of typed source file, recompile it without typing in a submodule,
 ;; then require those identifiers into the current level.
@@ -88,3 +88,11 @@
      #'(begin
          (provide name)
          (define name body ...))]))
+
+(provide+safe require-via-wormhole
+              make-safe-module
+              define+provide+safe
+              provide+safe
+              define+provide/contract
+              define/contract+provide
+              define+provide)

@@ -44,7 +44,9 @@
   (syntax-case stx ()
     [(_ stem)
      (with-syntax ([coerce/stem? (format-id stx "coerce/~a?" #'stem)])
-       #'(define+provide coerce/stem? (make-coercion-contract stem)))]))
+       #'(begin
+           (provide+safe coerce/stem?)
+           (define coerce/stem? (make-coercion-contract stem))))]))
 
 (define+provide-coercion-contract int)
 (define+provide-coercion-contract string)

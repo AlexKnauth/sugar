@@ -25,13 +25,13 @@
               values->list
               [sublist (list? index? index? . -> . list?)]
               [break-at (list? (and/c coerce/list? (or/c empty? increasing-nonnegative-list?)) . -> . list-of-lists?)]
-              [shift ((list? (or/c integer? integers?)) (any/c boolean?) . ->* . list?)])
+              [shift ((list? (or/c integer? integers?)) (any/c boolean?) . ->* . list?)]
+              [shift/values ((list? (or/c integer? integers?)) (any/c) . ->* . any)])
 
 
 ;; todo: can this work in typed context? couldn't figure out how to polymorphically `apply values`
 ;; macro doesn't work either
-(define+provide/contract (shift/values xs shift-amount-or-amounts [fill-item #f])
-  ((list? (or/c integer? integers?)) (any/c) . ->* . any)
+(define (shift/values xs shift-amount-or-amounts [fill-item #f])
   (apply (if (list? shift-amount-or-amounts) 
              values
              (λ xs xs)) 
