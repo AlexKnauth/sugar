@@ -1,4 +1,5 @@
 #lang typed/racket/base
+(require (for-syntax racket/base racket/syntax))
 (require (except-in racket/list flatten) typed/sugar/define typed/sugar/coerce typed/sugar/len)
 ;; use fully-qualified paths in require,
 ;; so they'll work when this file is included elsewhere
@@ -8,8 +9,8 @@
   (All (A) ((Listof A) (A . -> . Boolean) -> (Listof A)))
   (dropf-right (dropf xs test-proc) test-proc))
 
-;; use case because polymorphic types don't do well with optional args
 (define/typed+provide slicef-at
+  ;; with polymorphic function, use cased typing to simulate optional position arguments 
   (All (A) (case-> ((Listof A) (A . -> . Boolean) -> (Listof (Listof A)))
                    ((Listof A) (A . -> . Boolean) Boolean -> (Listof (Listof A)))))
   (case-lambda
@@ -46,6 +47,7 @@
 
 
 (define/typed+provide slice-at
+  ;; with polymorphic function, use cased typing to simulate optional position arguments 
   (All (A) (case-> ((Listof A) Positive-Integer -> (Listof (Listof A)))
                    ((Listof A) Positive-Integer Boolean -> (Listof (Listof A)))))
   (case-lambda
@@ -107,3 +109,55 @@
       result))
 
 
+;; for use inside quasiquote
+;; instead of ,(when ...) use ,@(when/splice ...)
+;; to avoid voids
+(provide when/splice)
+(define-syntax (when/splice stx)
+  (syntax-case stx ()
+    [(_ test body)
+     #'(if test (list body) '())]))
+
+(provide values->list)
+(define-syntax (values->list stx)
+  (syntax-case stx ()
+    [(_ values-expr) #'(call-with-values (λ () values-expr) list)]))
+
+
+(define/typed+provide (sublist xs i j)
+  (All (A) ((Listof A) Index Index -> (Listof A)))
+  (cond
+    [(> j (length xs)) (error 'sublist (format "ending index ~a exceeds length of list" j))]
+    [(>= j i) (take (drop xs i) (- j i))]
+    [else (error 'sublist (format "starting index ~a is larger than ending index ~a" i j))]))
+
+
+(define/typed+provide (break-at xs bps)
+  (All (A) ((Listof A) (Listof Index) -> (Listof (Listof A))))
+  (when (ormap (λ([bp : Index]) (>= bp (length xs))) bps)
+    (error 'break-at (format "breakpoint in ~v is greater than or equal to input list length = ~a" bps (length xs))))
+  ;; easier to do back to front, because then the list index for each item won't change during the recursion
+  ;; cons a zero onto bps (which may already start with zero) and then use that as the terminating condition
+  ;; because breaking at zero means we've reached the start of the list
+  (reverse (let loop ([xs xs][bps (reverse (cons 0 bps))])
+             (if (= (car bps) 0)
+                 (cons xs null) ; return whatever's left, because no more splits are possible
+                 (let-values ([(head tail) (split-at xs (car bps))])
+                   (cons tail (loop head (cdr bps))))))))
+
+
+(define/typed+provide (shift xs shift-amount-or-amounts [fill-item #f] [cycle? #f])
+  (((Listof Any) (U Integer (Listof Integer))) (Any Boolean) . ->* . (Listof Any))
+  (define/typed (do-shift xs how-far)
+    ((Listof Any) Integer . -> . (Listof Any))
+    (define abs-how-far (abs how-far))
+    (cond 
+      [(> abs-how-far (length xs)) (error 'shift "index is too large for list\nindex: ~a\nlist: ~v" how-far xs)]
+      [(= how-far 0) xs]
+      [(positive? how-far)
+       (append  (make-list abs-how-far fill-item) (drop-right xs abs-how-far))]
+      ;; otherwise how-far is negative
+      [else  (append (drop xs abs-how-far) (make-list abs-how-far fill-item))]))
+  (if (list? shift-amount-or-amounts)
+      (map (λ([amount : Integer]) (do-shift xs amount)) shift-amount-or-amounts)
+      (do-shift xs shift-amount-or-amounts)))
