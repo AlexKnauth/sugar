@@ -4,9 +4,10 @@
                      syntax/path-spec
                      racket/private/increader
                      compiler/cm-accomplice
-                     racket/match racket/function))
+                     racket/match racket/function)
+         sugar/define)
 
-(provide include-without-lang-line)
+(provide+safe include-without-lang-line)
 
 (define-syntax (do-include stx)
   (syntax-case stx ()
