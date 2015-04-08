@@ -6,7 +6,7 @@
 @(my-eval `(require sugar))
 
 @title{Debug}
-@defmodule[sugar/debug]
+@defmodule[#:multi (sugar/debug (submod sugar/debug safe) typed/sugar/debug)]
 
 Debugging utilities.
 

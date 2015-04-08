@@ -6,7 +6,7 @@
 @(my-eval `(require sugar))
 
 @title{Cache}
-@defmodule[sugar/cache]
+@defmodule[#:multi (sugar/cache (submod sugar/cache safe) typed/sugar/cache)]
 
 If, like Ricky Bobby and me, you want to go fast, then try using more caches. They're wicked fast.
 

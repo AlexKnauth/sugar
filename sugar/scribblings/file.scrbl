@@ -6,7 +6,7 @@
 @(my-eval `(require sugar))
 
 @title{File}
-@defmodule[sugar/file]
+@defmodule[#:multi (sugar/file (submod sugar/file safe) typed/sugar/file)]
 
 File utilities, mostly in the realm of file extensions. These functions don't access the filesystem. 
 

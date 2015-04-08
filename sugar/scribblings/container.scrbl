@@ -6,9 +6,9 @@
 @(my-eval `(require sugar))
 
 @title{Container}
-@defmodule[sugar/container]
+@defmodule[#:multi (sugar/container (submod sugar/container safe))]
 
-Type-neutral functions for getting elements out of a container, or testing membership.
+Type-neutral functions for getting elements out of a container, or testing membership. @bold{This submodule is untyped only.}
 
 
 @defproc[

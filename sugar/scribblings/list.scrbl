@@ -6,7 +6,8 @@
 @(my-eval `(require sugar racket/list))
 
 @title{List}
-@defmodule[sugar/list]
+@defmodule[#:multi (sugar/list (submod sugar/list safe) typed/sugar/list)]
+
 
 
 @defproc[
@@ -194,7 +195,7 @@ Move the items in @racket[_lst] to the right (if @racket[_how-far] is positive) 
 [how-far (or/c integer? (listof integer?))]
 [fill-item any/c #f])
 any]
-Same as @racket[shift], except that when @racket[_how-far] is a list, the resulting lists are returned as multiple values rather than as a list of lists.
+@bold{Untyped only.} Same as @racket[shift], except that when @racket[_how-far] is a list, the resulting lists are returned as multiple values rather than as a list of lists.
 
 @examples[#:eval my-eval
 (define xs (range 5))

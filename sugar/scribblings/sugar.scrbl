@@ -6,13 +6,15 @@
 @(my-eval `(require sugar))
 
 
-@title[#:style 'toc]{Sugar: readability & convenience library}
+@title[#:style 'toc]{Sugar}
 
 @author[(author+email "Matthew Butterick" "mb@mbtype.com")]
 
-@defmodule[sugar]
+@defmodule[#:multi (sugar (submod sugar safe) typed/sugar)]
 
 A collection of small functions to help make Racket code simpler & more readable.
+
+Sugar can be invoked three ways: as a standard untyped library, as an untyped library with contracts), or as a typed library. A few functions are only available as untyped or typed. These exceptions are noted below.
 
 @;local-table-of-contents[]
 

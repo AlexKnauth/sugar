@@ -6,7 +6,7 @@
 @(my-eval `(require sugar))
 
 @title{String}
-@defmodule[sugar/string]
+@defmodule[#:multi (sugar/string (submod sugar/string safe) typed/sugar/string)]
 
 
 @defproc[

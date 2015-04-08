@@ -6,7 +6,8 @@
 @(my-eval `(require sugar))
 
 @title{Len}
-@defmodule[sugar/len]
+@defmodule[#:multi (sugar/len (submod sugar/len safe) typed/sugar/len)]
+
 
 @defproc[
 (len

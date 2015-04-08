@@ -6,7 +6,7 @@
 @(my-eval `(require sugar))
 
 @title{Coercion}
-@defmodule[sugar/coerce]
+@defmodule[#:multi (sugar/coerce (submod sugar/coerce safe) typed/sugar/coerce)]
 
 Functions that coerce the datatype of a value to another type. Racket already has type-specific conversion functions. But if you're handling values of indeterminate type — as sometimes happens in an untyped language — then handling the possible cases individually gets to be a drag.
 
@@ -161,7 +161,7 @@ Return @racket[#t] for all @racket[_v] except @racket[#f], which remains @racket
 @defproc[(listish? [v any/c]) boolean?]
 @defproc[(vectorish? [v any/c]) boolean?]
 )]
-Predicates that report whether @racket[_v] can be coerced to the specified type.
+@bold{Untyped only.} Predicates that report whether @racket[_v] can be coerced to the specified type.
 
 @examples[#:eval my-eval
 (map intish? (list 3 3.5 #\A "A" + #t)) 
@@ -185,7 +185,7 @@ Predicates that report whether @racket[_v] can be coerced to the specified type.
 @defproc[(coerce/boolean? [v any/c]) boolean?]
 @defproc[(coerce/list? [v any/c]) list?]
 )]
-If @racket[_v] can be coerced to the specified type, change it to that type, then return it. If not, raise the usual contract error. These contracts can be used with input or output values. 
+@bold{Untyped only.} If @racket[_v] can be coerced to the specified type, change it to that type, then return it. If not, raise the usual contract error. These contracts can be used with input or output values. 
 
 @examples[#:eval my-eval
 (define/contract (add-ints x y)
