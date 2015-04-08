@@ -1,6 +1,6 @@
 #lang typed/racket/base
 (require racket/port)
-(provide (all-defined-out))
+#;(provide (all-defined-out))
 #;(require/typed xml [permissive-xexprs (Parameterof Boolean)]
                [#:struct prolog ([misc : (Listof Misc)][dtd : (Option DTD)][misc2 : (Listof Misc)])]
                [#:struct document ([prolog : Prolog][element : Element][misc : (Listof Misc)])])
