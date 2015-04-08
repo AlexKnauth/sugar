@@ -16,6 +16,6 @@ Icon
 
 # generated documentation
 sugar/doc/*
-scribblings/*.js
-scribblings/*.css
-scribblings/*.html
+sugar/scribblings/*.js
+sugar/scribblings/*.css
+sugar/scribblings/*.html
