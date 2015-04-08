@@ -14,7 +14,7 @@
 
 A collection of small functions to help make Racket code simpler & more readable.
 
-Sugar can be invoked three ways: as an untyped library, as an untyped library with contracts, or as a typed library. A few functions are only available as untyped or typed. These exceptions are noted below.
+Sugar can be invoked three ways: as an untyped library, as an untyped library with contracts (using the @tt{safe} submodule), or as a typed library. A few functions are only available as untyped or typed. These exceptions are noted below.
 
 @;local-table-of-contents[]
 
