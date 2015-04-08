@@ -22,7 +22,7 @@
 
 
 (provide Stringish)
-(define-type Stringish (U String Symbol Number Path Char))
+(define-type Stringish (U String Symbol Number Path Char Null Void))
 
 
 (define/typed+provide (->string x)
@@ -51,8 +51,7 @@
         (string->symbol (->string x)))))
 
 
-;; no need for "Pathable" type - same as Stringable
-(define-type Pathish Stringish)
+(define-type Pathish (U Stringish url))
 (provide Pathish)
 (define/typed+provide (->path x)
   (Pathish . -> . Path)
@@ -60,7 +59,7 @@
       x 
       (with-handlers ([exn:fail? (make-coercion-error-handler 'path x)])
         (cond 
-          [(url? x) (apply build-path (map path/param-path (url-path x)))]
+          [(url? x) (apply build-path (cast (map path/param-path (url-path x)) (List* Path-String (Listof Path-String))))]
           [else (string->path (->string x))]))))
 
 
