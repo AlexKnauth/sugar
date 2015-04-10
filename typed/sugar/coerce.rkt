@@ -64,10 +64,10 @@
           [else (string->path (->string x))]))))
 
 
-(define-type URL url)
+(define-type SugarURL url)
 ;; no need for "URLable" type - same as Stringable
 (define/typed+provide (->url x)
-  (Stringish -> URL) 
+  (Stringish -> SugarURL) 
   (with-handlers ([exn:fail? (make-coercion-error-handler 'url x)])
     (string->url (->string x))))
 
