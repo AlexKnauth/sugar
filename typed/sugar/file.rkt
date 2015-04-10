@@ -20,14 +20,14 @@
 
 
 ;; todo: add extensions
-(provide binary-extensions)
-(define binary-extensions : (Listof String)
+(define/typed+provide binary-extensions
+  (Listof String)
   (map symbol->string '(gif jpg jpeg mp3 png zip pdf ico tar ai eps exe)))
 
 (define/typed+provide (has-binary-ext? x)
   (Pathish -> Boolean)
   (let ([x (->path x)])
-    (ormap (λ([ext : String]) (has-ext? x ext)) binary-extensions)))
+    (ormap (λ:([ext : String]) (has-ext? x ext)) binary-extensions)))
 
 ;; put extension on path
 ;; use local contract here because this function is used within module

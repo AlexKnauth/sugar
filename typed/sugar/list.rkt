@@ -1,6 +1,8 @@
 #lang typed/racket/base
 (require (for-syntax racket/base racket/syntax))
-(require (except-in racket/list flatten) typed/sugar/define typed/sugar/coerce typed/sugar/len)
+(require (except-in racket/list flatten dropf dropf-right) typed/sugar/define "coerce.rkt" "len.rkt")
+(require/typed racket/list [dropf (All (A) (Listof A) (A -> Boolean) -> (Listof A))]
+               [dropf-right (All (A) (Listof A) (A -> Boolean) -> (Listof A))])
 ;; use fully-qualified paths in require,
 ;; so they'll work when this file is included elsewhere
 (provide (all-defined-out))
@@ -18,9 +20,9 @@
      (slicef-at xs pred #f)]
     [(xs pred force?)
      (define-values (last-list list-of-lists)
-       (for/fold
-        ([current-list : (Listof A) empty][list-of-lists : (Listof (Listof A)) empty])
-        ([x (in-list xs)])
+       (for/fold:
+           ([current-list : (Listof A) empty][list-of-lists : (Listof (Listof A)) empty])
+         ([x (in-list xs)])
          (if (pred x)
              (values (cons x null) (if (not (empty? current-list))
                                        (cons (reverse current-list) list-of-lists)
@@ -36,8 +38,8 @@
 (define/typed+provide (slicef-after xs pred)
   (All (A) ((Listof A) (A -> Boolean) -> (Listof (Listof A))))
   (define-values (last-list list-of-lists)
-    (for/fold ([current-list : (Listof A) empty][list-of-lists : (Listof (Listof A)) empty])
-              ([x (in-list xs)])
+    (for/fold: ([current-list : (Listof A) empty][list-of-lists : (Listof (Listof A)) empty])
+      ([x (in-list xs)])
       (if (pred x)
           (values empty (cons (reverse (cons x current-list)) list-of-lists))
           (values (cons x current-list) list-of-lists))))
@@ -55,8 +57,8 @@
      (slice-at xs len #f)]
     [(xs len force?)
      (define-values (last-list list-of-lists)
-       (for/fold ([current-list : (Listof A) empty][list-of-lists : (Listof (Listof A)) empty])
-                 ([(x i) (in-indexed xs)])
+       (for/fold: ([current-list : (Listof A) empty][list-of-lists : (Listof (Listof A)) empty])
+         ([x (in-list xs)][i (in-naturals)])
          (if (= (modulo (add1 i) len) 0)
              (values empty (cons (reverse (cons x current-list)) list-of-lists))
              (values (cons x current-list) list-of-lists))))
@@ -68,8 +70,8 @@
 (define/typed+provide (filter-split xs pred)
   (All (A) ((Listof A) (A -> Boolean) -> (Listof (Listof A))))
   (define-values (last-list list-of-lists)
-    (for/fold ([current-list : (Listof A) empty][list-of-lists : (Listof (Listof A)) empty])
-              ([x (in-list xs)])
+    (for/fold: ([current-list : (Listof A) empty][list-of-lists : (Listof (Listof A)) empty])
+      ([x (in-list xs)])
       (if (pred x)
           (values empty (if (not (empty? current-list))
                             (cons (reverse current-list) list-of-lists)
@@ -83,7 +85,7 @@
   (All (A) ((Listof A) -> (HashTable A Integer)))
   (define counter ((inst make-hash A Integer)))
   (for ([item (in-list xs)])
-    (hash-update! counter item (λ([v : Integer]) (add1 v)) (λ _ 0)))
+    (hash-update! counter item (λ:([v : Integer]) (add1 v)) (λ _ 0)))
   counter)
 
 
@@ -102,7 +104,7 @@
   (define result (members-unique? x))
   (if (not result)
       (let* ([duplicate-keys (filter-not empty? (hash-map (frequency-hash (->list x)) 
-                                                          (λ(key:element [value:count : Integer]) (if (> value:count 1) key:element '()))))])
+                                                          (λ:([element : Any] [freq : Integer]) (if (> freq 1) element '()))))])
         (error (string-append "members-unique? failed because " (if (= (len duplicate-keys) 1) 
                                                                     "item isn’t"
                                                                     "items aren’t") " unique:") duplicate-keys))
@@ -135,7 +137,7 @@
 (define/typed+provide (break-at xs bps)
   (All (A) ((Listof A) (U Index (Listof Index)) -> (Listof (Listof A))))
   (let ([bps (if (list? bps) bps (list bps))]) ; coerce bps to list
-    (when (ormap (λ([bp : Index]) (>= bp (length xs))) bps)
+    (when (ormap (λ:([bp : Index]) (>= bp (length xs))) bps)
       (error 'break-at (format "breakpoint in ~v is greater than or equal to input list length = ~a" bps (length xs))))
     ;; easier to do back to front, because then the list index for each item won't change during the recursion
     ;; cons a zero onto bps (which may already start with zero) and then use that as the terminating condition
@@ -147,18 +149,26 @@
                      (cons tail (loop head (cdr bps)))))))))
 
 
-(define/typed+provide (shift xs shift-amount-or-amounts [fill-item #f] [cycle? #f])
-  (((Listof Any) (U Integer (Listof Integer))) (Any Boolean) . ->* . (Listof Any))
-  (define/typed (do-shift xs how-far)
-    ((Listof Any) Integer -> (Listof Any))
-    (define abs-how-far (abs how-far))
-    (cond 
-      [(> abs-how-far (length xs)) (error 'shift "index is too large for list\nindex: ~a\nlist: ~v" how-far xs)]
-      [(= how-far 0) xs]
-      [(positive? how-far)
-       (append  (make-list abs-how-far fill-item) (drop-right xs abs-how-far))]
-      ;; otherwise how-far is negative
-      [else  (append (drop xs abs-how-far) (make-list abs-how-far fill-item))]))
-  (if (list? shift-amount-or-amounts)
-      (map (λ([amount : Integer]) (do-shift xs amount)) shift-amount-or-amounts)
-      (do-shift xs shift-amount-or-amounts)))
+(define/typed+provide shift
+  (case-> ((Listof Any) (U Integer (Listof Integer)) -> (Listof Any))
+          ((Listof Any) (U Integer (Listof Integer)) Any -> (Listof Any))
+          ((Listof Any) (U Integer (Listof Integer)) Any Boolean -> (Listof Any)))  
+  (case-lambda
+    [(xs shift-amount-or-amounts)
+     (shift xs shift-amount-or-amounts #f #f)]
+    [(xs shift-amount-or-amounts fill-item)
+     (shift xs shift-amount-or-amounts fill-item #f)]
+    [(xs shift-amount-or-amounts fill-item cycle)
+     (define/typed (do-shift xs how-far)
+       ((Listof Any) Integer -> (Listof Any))
+       (define abs-how-far (abs how-far))
+       (cond 
+         [(> abs-how-far (length xs)) (error 'shift "index is too large for list\nindex: ~a\nlist: ~v" how-far xs)]
+         [(= how-far 0) xs]
+         [(positive? how-far)
+          (append  (make-list abs-how-far fill-item) (drop-right xs abs-how-far))]
+         ;; otherwise how-far is negative
+         [else  (append (drop xs abs-how-far) (make-list abs-how-far fill-item))]))
+     (if (list? shift-amount-or-amounts)
+         (map (λ:([amount : Integer]) (do-shift xs amount)) shift-amount-or-amounts)
+         (do-shift xs shift-amount-or-amounts))]))

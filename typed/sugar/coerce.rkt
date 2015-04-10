@@ -1,7 +1,8 @@
 #lang typed/racket/base
 (require (for-syntax typed/racket/base racket/syntax))
 (require typed/net/url racket/set racket/sequence)
-(require typed/sugar/len typed/sugar/define)
+(require typed/sugar/define)
+(require "len.rkt") ; want relative path-spec for bilingual conversion
 
 (define-syntax-rule (make-coercion-error-handler target-format x)
   (λ(e) (error (format "Can’t convert ~s to ~a" x target-format))))
@@ -63,6 +64,7 @@
           [else (string->path (->string x))]))))
 
 
+(define-type URL url)
 ;; no need for "URLable" type - same as Stringable
 (define/typed+provide (->url x)
   (Stringish -> URL) 

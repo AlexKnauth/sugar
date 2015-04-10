@@ -1,5 +1,5 @@
 #lang typed/racket/base/no-check
-(require (for-syntax typed/racket/base) typed/rackunit)
+(require (for-syntax typed/racket/base) typed/rackunit racket/function)
 
 (provide check-typing-fails check-typing)
 
@@ -13,7 +13,7 @@
        #`(begin
            (define-namespace-anchor ns)
            (let ([E (λ(#,λ-arg) (eval #,eval-string (namespace-anchor->namespace ns)))])
-             (apply #,check-string (list (λ _ (call-with-values (λ _ (E 'expr)) (λ vals (car vals)))))))))]))
+             (apply #,check-string (list )))))]))
 
 (define-syntax-rule (check-typing-fails expr)
   (check-typing-base #t expr))

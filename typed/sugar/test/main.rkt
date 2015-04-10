@@ -76,7 +76,7 @@
 
 (check-equal? (trimf (list 4 1 2 3 4) even?) '(1 2 3))
 (check-equal? (trimf (list 1 3 2 4 5 6 8 9 13) odd?) '(2 4 5 6 8))
-(check-equal? (filter-split '("foo" " " "bar" "\n" "\n" "ino") (λ([x : String]) (< (string-length x) 3))) '(("foo")("bar")("ino")))
+(check-equal? (filter-split '("foo" " " "bar" "\n" "\n" "ino") (λ:([x : String]) (< (string-length x) 3))) '(("foo")("bar")("ino")))
 (check-equal? (filter-split '(1 2 3 4 5 6) even?) '((1)(3)(5)))
 
 
@@ -153,8 +153,10 @@
 (check-equal? (shift xs 5 0) (make-list 5 0))
 (check-exn exn:fail? (λ() (shift xs -10)))
 
-;;;;; begin common tests
+;; end shared tests
 
 
+#|
 (check-typing-fails (slice-at (range 5) 0)) ; needs a positive integer as second arg
 (check-typing-fails (slicef-at (range 5) 3)) ; needs a procedure as second arg
+|#
