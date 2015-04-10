@@ -2,7 +2,7 @@
 (require (for-syntax typed/racket/base) typed/sugar/define)
 
 (define/typed+provide (make-caching-proc base-proc) 
-  (All (A B) (A * . -> . B) -> (A * . -> . B))
+  (All (A B) (A * -> B) -> (A * -> B))
   (let ([cache ((inst make-hash (Listof A) B))])
     (λ args
       (hash-ref! cache args (λ () (apply base-proc args))))))

@@ -1,7 +1,7 @@
 #lang racket/base
 (require racket/include rackunit sugar racket/list net/url racket/set racket/match)
 
-;;;;; begin common tests
+;; begin shared typed / untyped tests
 
 (check-equal? (->int 42) 42)
 (check-equal? (->int 42.1) 42)

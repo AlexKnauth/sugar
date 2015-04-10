@@ -2,7 +2,7 @@
 (require typed/sugar/define)
 
 (define/typed+provide (bytecount->string bytecount)
-  (Nonnegative-Integer . -> . String)
+  (Nonnegative-Integer -> String)
   (define (format-with-threshold threshold suffix)
     ;; upconvert by factor of 100 to get two digits after decimal
     (format "~a ~a" (exact->inexact (/ (round ((* bytecount 100) . / . threshold)) 100)) suffix))

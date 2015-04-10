@@ -6,7 +6,7 @@
 (define-type Lengthable (U (Listof Any) String Symbol Path (Vectorof Any) HashTableTop (Setof Any) (Sequenceof Any)))
 
 (define/typed+provide (len x)
-  (Lengthable . -> . Nonnegative-Integer)
+  (Lengthable -> Nonnegative-Integer)
   (cond
     [(list? x) (length x)]
     [(string? x) (string-length x)]

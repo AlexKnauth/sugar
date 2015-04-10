@@ -2,7 +2,7 @@
 (require racket/include typed/rackunit typed/net/url racket/set racket/list racket/match)
 (require typed/sugar)
 
-;;;;; begin common tests
+;; begin shared typed / untyped tests
 
 (check-equal? (->int 42) 42)
 (check-equal? (->int 42.1) 42)

@@ -9,7 +9,7 @@
 
 (define-type Intable (U Lengthable Number String Symbol Char Path))
 (define/typed+provide (->int x)
-  (Intable . -> . Integer)
+  (Intable -> Integer)
   (with-handlers ([exn:fail? (make-coercion-error-handler 'integer x)])
     (cond
       [(or (integer? x) (real? x)) (assert (inexact->exact (floor x)) integer?)]
@@ -26,7 +26,7 @@
 
 
 (define/typed+provide (->string x)
-  (Stringish . -> . String)
+  (Stringish -> String)
   (if (string? x)
       x ; fast exit for strings
       (with-handlers ([exn:fail? (make-coercion-error-handler 'string x)])
@@ -44,7 +44,7 @@
 
 ;; no need for "Symbolable" type - same as Stringable
 (define/typed+provide (->symbol x)
-  (Stringish . -> . Symbol)
+  (Stringish -> Symbol)
   (if (symbol? x)
       x
       (with-handlers ([exn:fail? (make-coercion-error-handler 'symbol x)])
@@ -54,7 +54,7 @@
 (define-type Pathish (U Stringish url))
 (provide Pathish)
 (define/typed+provide (->path x)
-  (Pathish . -> . Path)
+  (Pathish -> Path)
   (if (path? x)
       x 
       (with-handlers ([exn:fail? (make-coercion-error-handler 'path x)])
@@ -65,19 +65,19 @@
 
 ;; no need for "URLable" type - same as Stringable
 (define/typed+provide (->url x)
-  (Stringish . -> . URL) 
+  (Stringish -> URL) 
   (with-handlers ([exn:fail? (make-coercion-error-handler 'url x)])
     (string->url (->string x))))
 
 
 (define/typed+provide (->complete-path x)
-  (Stringish . -> . Path)
+  (Stringish -> Path)
   (with-handlers ([exn:fail? (make-coercion-error-handler 'complete-path x)])
     (path->complete-path (->path x))))
 
 
 (define/typed+provide (->list x)
-  (Any . -> . (Listof Any))
+  (Any -> (Listof Any))
   (if (list? x)
       x
       (with-handlers ([exn:fail? (make-coercion-error-handler 'list x)])
@@ -95,7 +95,7 @@
 
 
 (define/typed+provide (->vector x)
-  (Any . -> . VectorTop)
+  (Any -> VectorTop)
   (if (vector? x)
       x
       (with-handlers ([exn:fail? (make-coercion-error-handler 'vector x)])
@@ -103,5 +103,5 @@
 
 
 (define/typed+provide (->boolean x)
-  (Any . -> . Boolean)
+  (Any -> Boolean)
   (and x #t))

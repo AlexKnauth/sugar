@@ -27,7 +27,7 @@
      #'(begin
          (provide proc-name)
          (begin
-           (: proc-name type-expr)
+           (: proc-name : type-expr)
            (define proc-name body ...)))]))
 
 (define-syntax (define-type+predicate stx)

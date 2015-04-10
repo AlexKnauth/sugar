@@ -6,13 +6,13 @@
 (provide (all-defined-out))
 
 (define/typed+provide (trimf xs test-proc)
-  (All (A) ((Listof A) (A . -> . Boolean) -> (Listof A)))
+  (All (A) ((Listof A) (A -> Boolean) -> (Listof A)))
   (dropf-right (dropf xs test-proc) test-proc))
 
 (define/typed+provide slicef-at
   ;; with polymorphic function, use cased typing to simulate optional position arguments 
-  (All (A) (case-> ((Listof A) (A . -> . Boolean) -> (Listof (Listof A)))
-                   ((Listof A) (A . -> . Boolean) Boolean -> (Listof (Listof A)))))
+  (All (A) (case-> ((Listof A) (A -> Boolean) -> (Listof (Listof A)))
+                   ((Listof A) (A -> Boolean) Boolean -> (Listof (Listof A)))))
   (case-lambda
     [(xs pred)
      (slicef-at xs pred #f)]
@@ -34,7 +34,7 @@
            list-of-lists))]))
 
 (define/typed+provide (slicef-after xs pred)
-  (All (A) ((Listof A) (A . -> . Boolean) -> (Listof (Listof A))))
+  (All (A) ((Listof A) (A -> Boolean) -> (Listof (Listof A))))
   (define-values (last-list list-of-lists)
     (for/fold ([current-list : (Listof A) empty][list-of-lists : (Listof (Listof A)) empty])
               ([x (in-list xs)])
@@ -66,7 +66,7 @@
 
 
 (define/typed+provide (filter-split xs pred)
-  (All (A) ((Listof A) (A . -> . Boolean) -> (Listof (Listof A))))
+  (All (A) ((Listof A) (A -> Boolean) -> (Listof (Listof A))))
   (define-values (last-list list-of-lists)
     (for/fold ([current-list : (Listof A) empty][list-of-lists : (Listof (Listof A)) empty])
               ([x (in-list xs)])
@@ -150,7 +150,7 @@
 (define/typed+provide (shift xs shift-amount-or-amounts [fill-item #f] [cycle? #f])
   (((Listof Any) (U Integer (Listof Integer))) (Any Boolean) . ->* . (Listof Any))
   (define/typed (do-shift xs how-far)
-    ((Listof Any) Integer . -> . (Listof Any))
+    ((Listof Any) Integer -> (Listof Any))
     (define abs-how-far (abs how-far))
     (cond 
       [(> abs-how-far (length xs)) (error 'shift "index is too large for list\nindex: ~a\nlist: ~v" how-far xs)]
