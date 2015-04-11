@@ -64,8 +64,8 @@
           [else (string->path (->string x))]))))
 
 
+;; Use private name here because 'URL' identifier has been added since 6.0
 (define-type SugarURL url)
-;; no need for "URLable" type - same as Stringable
 (define/typed+provide (->url x)
   (Stringish -> SugarURL) 
   (with-handlers ([exn:fail? (make-coercion-error-handler 'url x)])

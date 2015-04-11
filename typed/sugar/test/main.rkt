@@ -157,6 +157,7 @@
 
 
 #|
+;; todo: revise `check-typing-fails` to make it compatible with 6.0
 (check-typing-fails (slice-at (range 5) 0)) ; needs a positive integer as second arg
 (check-typing-fails (slicef-at (range 5) 3)) ; needs a procedure as second arg
 |#
